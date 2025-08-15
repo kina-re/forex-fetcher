@@ -2,8 +2,8 @@ name: Forex Fetcher (every minute)
 
 on:
   schedule:
-    - cron: '* * * * *'   # runs every minute (cron uses UTC)
-  workflow_dispatch:       # lets you run it manually from the Actions tab
+    - cron: '* * * * *'   # runs every minute (UTC)
+  workflow_dispatch:
 
 jobs:
   fetch:
@@ -30,6 +30,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
+          SKIP_DB: '1'   # <- set to '0' (or remove) once your DB host is public (e.g., Neon/Supabase)
           # Optional overrides:
           # SYMBOL: 'EUR/USD'
           # INTERVAL: '1min'
