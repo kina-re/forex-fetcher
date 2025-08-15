@@ -1,0 +1,37 @@
+name: Forex Fetcher (every minute)
+
+on:
+  schedule:
+    - cron: '* * * * *'   # runs every minute (cron uses UTC)
+  workflow_dispatch:       # lets you run it manually from the Actions tab
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests psycopg2-binary python-dotenv
+
+      - name: Run one-shot fetcher
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          # Optional overrides:
+          # SYMBOL: 'EUR/USD'
+          # INTERVAL: '1min'
+        run: |
+          python gha_run.py
