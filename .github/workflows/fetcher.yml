@@ -41,7 +41,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
-          SKIP_DB: '1'   # <- keep '1' for testing; set to '0'/remove when your cloud Postgres is ready
+          SKIP_DB: '0'   # <- keep '1' for testing; set to '0'/remove when your cloud Postgres is ready
           # Optional overrides:
           # SYMBOL: 'EUR/USD'
           # INTERVAL: '1min'
