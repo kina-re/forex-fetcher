@@ -8,15 +8,15 @@ import psycopg2
 from psycopg2.extras import execute_values
 
 # -------- Config from environment (GitHub Secrets) --------
-REQUIRED_VARS = ["API_KEY"]  # DB vars are optional if SKIP_DB=1
-API_KEY = os.getenv("API_KEY")
+# Only API_KEY is required when SKIP_DB=1 (testing mode).
+REQUIRED_VARS = ["API_KEY"]
 missing = [k for k in REQUIRED_VARS if not os.getenv(k)]
 if missing:
     print(f"Missing required secrets: {', '.join(missing)}", file=sys.stderr)
     sys.exit(1)
 
-# Optional skip flag so workflow can run without DB ready
-SKIP_DB = os.getenv("SKIP_DB", "0") == "1"
+API_KEY = os.getenv("API_KEY")
+SKIP_DB = os.getenv("SKIP_DB", "0") == "1"  # if '1' we won't touch the DB
 
 DB_CONFIG = {
     "dbname": os.getenv("DB_NAME"),
@@ -25,7 +25,7 @@ DB_CONFIG = {
     "host": os.getenv("DB_HOST"),
     "port": os.getenv("DB_PORT"),
     "connect_timeout": 10,
-    "sslmode": "require",  # most cloud Postgres require SSL
+    "sslmode": "require",  # required by most cloud Postgres providers
 }
 
 SYMBOL = os.getenv("SYMBOL", "EUR/USD")
@@ -155,7 +155,7 @@ def main():
               ", ".join(b["datetime"].strftime("%Y-%m-%d %H:%M:%S") for b in bars[-5:]))
         return
 
-    # ensure DB config is present before attempting to connect
+    # Ensure DB secrets exist before connect
     required_db = ["DB_NAME", "DB_USER", "DB_PASSWORD", "DB_HOST", "DB_PORT"]
     missing_db = [k for k in required_db if not os.getenv(k)]
     if missing_db:
@@ -167,6 +167,10 @@ def main():
     print(f"Upserted {len(rows)} rows up to {rows[-1]['datetime']:%Y-%m-%d %H:%M:%S %Z}")
 
 if __name__ == "__main__":
-    main()
-
-
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        print("ERROR:", str(e))
+        traceback.print_exc()
+        raise
